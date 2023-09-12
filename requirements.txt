@@ -1,0 +1,4 @@
+django<3.0
+requests<2.32
+xmltodict<0.14
+python-nmap<0.8
