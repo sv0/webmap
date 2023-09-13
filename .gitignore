@@ -9,3 +9,5 @@ htmlcov/
 .tox/
 # webmap PDF report
 static/*.pdf
+# sqlite3 database
+db.sqlite3
