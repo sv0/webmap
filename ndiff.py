@@ -4,18 +4,23 @@ import xmltodict, json, html, os, hashlib, re, urllib.parse, base64
 from collections import OrderedDict
 from functions import *
 
+
 def ndiff(request, f1, f2):
     f = {}
 
     if token_check(request.GET['token']) is not True:
-        return HttpResponse(json.dumps({'error':'invalid token'}, indent=4), content_type="application/json")
+        return HttpResponse(
+            json.dumps({'error': 'invalid token'}, indent=4),
+            content_type="application/json",
+        )
 
     f['f1'] = get_ports_details(f1)
     f['f2'] = get_ports_details(f2)
 
-    r = get_diff(f['f1'],f['f2'])
+    r = get_diff(f['f1'], f['f2'])
 
     return HttpResponse(json.dumps(r, indent=4), content_type="application/json")
+
 
 def check_cve_id(cveid, cveobj):
     for f1cvei in cveobj:
@@ -25,8 +30,9 @@ def check_cve_id(cveid, cveobj):
 
     return False
 
-def get_diff(f1,f2):
-    r = {'hosts':{}, 'ports':{}, 'cve':{}}
+
+def get_diff(f1, f2):
+    r = {'hosts': {}, 'ports': {}, 'cve': {}}
 
     # ports f1 > f2
     for host in f1['hosts']:
@@ -47,7 +53,7 @@ def get_diff(f1,f2):
                     'state': '>',
                     'product': '>',
                     'extrainfo': '>',
-                    'diff': {}
+                    'diff': {},
                 }
 
             if host in f2['hosts']:
@@ -76,7 +82,7 @@ def get_diff(f1,f2):
             if host not in r['ports']:
                 r['ports'][host] = {}
             if i['port'] not in r['ports'][host]:
-                #r['ports'][host][i['port']] = {}
+                # r['ports'][host][i['port']] = {}
 
                 r['ports'][host][i['port']] = {
                     'port': '<',
@@ -84,7 +90,7 @@ def get_diff(f1,f2):
                     'state': '<',
                     'product': '<',
                     'extrainfo': '<',
-                    'diff': {}
+                    'diff': {},
                 }
 
             if host in f1['hosts']:
@@ -101,8 +107,6 @@ def get_diff(f1,f2):
                             r['ports'][host][i['port']]['extrainfo'] = '='
 
             r['ports'][host][i['port']]['diff']['f2'] = i
-
-
 
     for host in f1['hosts']:
         if host not in r['cve']:

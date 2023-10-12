@@ -11,10 +11,18 @@ urlpatterns = [
     path('report/<port>/', views.port, name='port'),
     path('report/service/<filterservice>/', views.index, name='service'),
     path('portid/<filterportid>/', views.index, name='portid'),
-    path('api/v1/scan/<scanfile>/<faddress>', api.apiv1_hostdetails, name='apiv1_hostdetails'),
+    path(
+        'api/v1/scan/<scanfile>/<faddress>',
+        api.apiv1_hostdetails,
+        name='apiv1_hostdetails',
+    ),
     path('api/v1/scan/<scanfile>', api.apiv1_hostdetails, name='apiv1_hostdetails'),
     path('api/v1/scan', api.apiv1_scan, name='apiv1_scan'),
-    path('api/v1/nmap/scan/active', functions_nmap.nmap_scaninfo, name='apiv1_scan_active'),
+    path(
+        'api/v1/nmap/scan/active',
+        functions_nmap.nmap_scaninfo,
+        name='apiv1_scan_active',
+    ),
     path('api/v1/nmap/scan/new', functions_nmap.nmap_newscan, name='apiv1_scan_new'),
     path('api/v1/nmap/ndiff/<f1>/<f2>', ndiff.ndiff, name='ndiff'),
     path('api/setlabel/<objtype>/<label>/<hashstr>/', api.label, name='api_label'),
@@ -37,8 +45,4 @@ if settings.DEBUG:
     # urlpatterns = [
     #     path('__debug__/', include(debug_toolbar.urls)),
     # ] + urlpatterns
-    urlpatterns += static(
-        settings.STATIC_URL,
-        document_root=settings.STATIC_ROOT
-    )
-
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

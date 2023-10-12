@@ -7,34 +7,37 @@ def token_check(token):
         return True
     return False
 
+
 def labelToMargin(label):
     labels = {
-        'Vulnerable':'10px',
-        'Critical':'22px',
-        'Warning':'28px',
-        'Checked':'28px'
+        'Vulnerable': '10px',
+        'Critical': '22px',
+        'Warning': '28px',
+        'Checked': '28px',
     }
 
     if label in labels:
         return labels[label]
+
 
 def labelToColor(label):
     labels = {
-        'Vulnerable':'red',
-        'Critical':'black',
-        'Warning':'orange',
-        'Checked':'blue'
+        'Vulnerable': 'red',
+        'Critical': 'black',
+        'Warning': 'orange',
+        'Checked': 'blue',
     }
 
     if label in labels:
         return labels[label]
 
+
 def fromOSTypeToFontAwesome(ostype):
     icons = {
-        'windows':'fab fa-windows',
-        'solaris':'fab fa-linux',    # there isn't a better icon on fontawesome :(
-        'unix':'fab fa-linux',        # same here...
-        'linux':'fab fa-linux',
+        'windows': 'fab fa-windows',
+        'solaris': 'fab fa-linux',  # there isn't a better icon on fontawesome :(
+        'unix': 'fab fa-linux',  # same here...
+        'linux': 'fab fa-linux',
     }
 
     if ostype.lower() in icons:
@@ -42,22 +45,23 @@ def fromOSTypeToFontAwesome(ostype):
     else:
         return 'fas fa-question'
 
+
 def nmap_ports_stats(scanfile):
     try:
-        oo = xmltodict.parse(open('xml/'+scanfile, 'r').read())
+        oo = xmltodict.parse(open('xml/' + scanfile, 'r').read())
     except:
-        return {'po':0,'pc':0,'pf':0}
+        return {'po': 0, 'pc': 0, 'pf': 0}
 
     r = json.dumps(oo['nmaprun'], indent=4)
     o = json.loads(r)
     debug = {}
 
-    po,pc,pf = 0,0,0
+    po, pc, pf = 0, 0, 0
 
     if 'host' not in o:
-        return {'po':0,'pc':0,'pf':0}
+        return {'po': 0, 'pc': 0, 'pf': 0}
 
-    iii=0
+    iii = 0
     lastaddress = ''
     for ik in o['host']:
         if type(ik) is dict:
@@ -94,72 +98,73 @@ def nmap_ports_stats(scanfile):
                     lastportid = p['@portid']
 
                 if address not in debug:
-                    debug[address] = {'portcount':{'pc':{},'po':{},'pf':{}}}
+                    debug[address] = {'portcount': {'pc': {}, 'po': {}, 'pf': {}}}
                 debug[address][p['@portid']] = p['state']
 
                 if p['state']['@state'] == 'closed':
-                    pc = (pc + 1)
+                    pc = pc + 1
                     debug[address]['portcount']['pc'][iii] = pc
                 elif p['state']['@state'] == 'open':
-                    po = (po + 1)
+                    po = po + 1
                     debug[address]['portcount']['po'][iii] = po
                 elif p['state']['@state'] == 'filtered':
-                    pf = (pf + 1)
+                    pf = pf + 1
                     debug[address]['portcount']['pf'][iii] = pf
-                iii = (iii + 1)
+                iii = iii + 1
 
-    return {'po':po,'pc':pc,'pf':pf, 'debug':json.dumps(debug)}
+    return {'po': po, 'pc': pc, 'pf': pf, 'debug': json.dumps(debug)}
+
 
 def get_cve(scanmd5):
     cvehost = {}
     cvefiles = os.listdir('notes')
     for cf in cvefiles:
-        m = re.match('^('+scanmd5+')_([a-z0-9]{32,32})\.cve$', cf)
+        m = re.match('^(' + scanmd5 + ')_([a-z0-9]{32,32})\.cve$', cf)
         if m is not None:
             if m.group(1) not in cvehost:
                 cvehost[m.group(1)] = {}
 
             if m.group(2) not in cvehost[m.group(1)]:
-                cvehost[m.group(1)][m.group(2)] = open('notes/'+cf, 'r').read()
+                cvehost[m.group(1)][m.group(2)] = open('notes/' + cf, 'r').read()
 
-            #cvehost[m.group(1)][m.group(2)][m.group(3)] = open('notes/'+cf, 'r').read()
+            # cvehost[m.group(1)][m.group(2)][m.group(3)] = open('notes/'+cf, 'r').read()
 
     return cvehost
 
+
 def get_ports_details(scanfile):
     faddress = ""
-    oo = xmltodict.parse(open('xml/'+scanfile, 'r').read())
+    oo = xmltodict.parse(open('xml/' + scanfile, 'r').read())
     out2 = json.dumps(oo['nmaprun'], indent=4)
     o = json.loads(out2)
 
-    r = {'file':scanfile, 'hosts': {}}
+    r = {'file': scanfile, 'hosts': {}}
     scanmd5 = hashlib.md5(str(scanfile).encode('utf-8')).hexdigest()
 
     # collect all labels in labelhost dict
     labelhost = {}
     labelfiles = os.listdir('notes')
     for lf in labelfiles:
-        m = re.match('^('+scanmd5+')_([a-z0-9]{32,32})\.host\.label$', lf)
+        m = re.match('^(' + scanmd5 + ')_([a-z0-9]{32,32})\.host\.label$', lf)
         if m is not None:
             if m.group(1) not in labelhost:
                 labelhost[m.group(1)] = {}
-            labelhost[m.group(1)][m.group(2)] = open('notes/'+lf, 'r').read()
+            labelhost[m.group(1)][m.group(2)] = open('notes/' + lf, 'r').read()
 
     # collect all notes in noteshost dict
     noteshost = {}
     notesfiles = os.listdir('notes')
     for nf in notesfiles:
-        m = re.match('^('+scanmd5+')_([a-z0-9]{32,32})\.notes$', nf)
+        m = re.match('^(' + scanmd5 + ')_([a-z0-9]{32,32})\.notes$', nf)
         if m is not None:
             if m.group(1) not in noteshost:
                 noteshost[m.group(1)] = {}
-            noteshost[m.group(1)][m.group(2)] = open('notes/'+nf, 'r').read()
+            noteshost[m.group(1)][m.group(2)] = open('notes/' + nf, 'r').read()
 
     # collect all cve in cvehost dict
     cvehost = get_cve(scanmd5)
 
     for ik in o['host']:
-
         # this fix single host report
         if type(ik) is dict:
             i = ik
@@ -175,11 +180,13 @@ def get_ports_details(scanfile):
                     for hi in i['hostnames']['hostname']:
                         hostname[hi['@type']] = hi['@name']
                 else:
-                    hostname[i['hostnames']['hostname']['@type']] = i['hostnames']['hostname']['@name'];
+                    hostname[i['hostnames']['hostname']['@type']] = i['hostnames'][
+                        'hostname'
+                    ]['@name']
 
         if i['status']['@state'] == 'up':
-            po,pc,pf = 0,0,0
-            ss,pp,ost = {},{},{}
+            po, pc, pf = 0, 0, 0
+            ss, pp, ost = {}, {}, {}
             lastportid = 0
 
             if '@addr' in i['address']:
@@ -193,14 +200,14 @@ def get_ports_details(scanfile):
                 continue
 
             addressmd5 = hashlib.md5(str(address).encode('utf-8')).hexdigest()
-            #cpe[address] = {}
+            # cpe[address] = {}
 
             labelout = ''
             if scanmd5 in labelhost:
                 if addressmd5 in labelhost[scanmd5]:
                     labelout = labelhost[scanmd5][addressmd5]
 
-            notesout,notesb64,removenotes = '','',''
+            notesout, notesb64, removenotes = '', '', ''
             if scanmd5 in noteshost:
                 if addressmd5 in noteshost[scanmd5]:
                     notesb64 = noteshost[scanmd5][addressmd5]
@@ -208,18 +215,23 @@ def get_ports_details(scanfile):
             #        removenotes = '<li><a href="#!" onclick="javascript:removeNotes(\''+addressmd5+'\', \''+str(hostindex)+'\');">Remove notes</a></li>'
 
             cveout = ''
-            #cvecount = 0
+            # cvecount = 0
             if scanmd5 in cvehost:
                 if addressmd5 in cvehost[scanmd5]:
                     cveout = json.loads(cvehost[scanmd5][addressmd5])
             #        for cveobj in cvejson:
             #            cvecount = (cvecount + 1)
 
-
-            #if faddress == "":
+            # if faddress == "":
             #    r['hosts'][address] = {'hostname':hostname, 'label':labelout, 'notes':notesb64}
-            #else:
-            r['hosts'][address] = {'ports':[], 'hostname':hostname, 'label':labelout, 'notes':notesb64, 'CVE':cveout}
+            # else:
+            r['hosts'][address] = {
+                'ports': [],
+                'hostname': hostname,
+                'label': labelout,
+                'notes': notesb64,
+                'CVE': cveout,
+            }
 
             if 'ports' in i and 'port' in i['ports']:
                 for pobj in i['ports']['port']:
@@ -233,7 +245,7 @@ def get_ports_details(scanfile):
                     else:
                         lastportid = p['@portid']
 
-                    v,z,e='','',''
+                    v, z, e = '', '', ''
                     pp[p['@portid']] = p['@portid']
 
                     servicename = ''
@@ -251,15 +263,17 @@ def get_ports_details(scanfile):
 
                         servicename = p['service']['@name']
 
-                    #if faddress != "":
-                    r['hosts'][address]['ports'].append({
-                        'port': p['@portid'],
-                        'name': servicename,
-                        'state': p['state']['@state'],
-                        'protocol': p['@protocol'],
-                        'reason': p['state']['@reason'],
-                        'product': z,
-                        'version': v,
-                        'extrainfo': e
-                    })
+                    # if faddress != "":
+                    r['hosts'][address]['ports'].append(
+                        {
+                            'port': p['@portid'],
+                            'name': servicename,
+                            'state': p['state']['@state'],
+                            'protocol': p['@protocol'],
+                            'reason': p['state']['@reason'],
+                            'product': z,
+                            'version': v,
+                            'extrainfo': e,
+                        }
+                    )
     return r
