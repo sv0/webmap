@@ -11,3 +11,4 @@ htmlcov/
 static/*.pdf
 # sqlite3 database
 db.sqlite3
+Makefile.venv
